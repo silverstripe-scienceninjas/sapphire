@@ -17,8 +17,20 @@
  * @subpackage model
  */
 class Text extends StringField {
+
 	static $casting = array(
-		"AbsoluteLinks" => "HTMLText",
+		"AbsoluteLinks" => "Text",
+		"BigSummary" => "Text",
+		"ContextSummary" => "Text",
+		"FirstParagraph" => "Text",
+		"FirstSentence" => "Text",
+		"LimitCharacters" => "Text",
+		"LimitSentences" => "Text",
+		"Summary" => "Text",
+		'EscapeXML' => 'Text',
+		'LimitWordCount' => 'Text',
+		'LimitWordCountXML' => 'HTMLText',
+		'NoHTML' => 'Text',
 	);
 	
  	/**
@@ -63,9 +75,12 @@ class Text extends StringField {
 	}
 	/**
 	 * Return the value of the field with XML tags escaped.
+	 * 
+	 * @deprecated 3.0 Use DBField->XML() instead.
 	 * @return string
 	 */
 	function EscapeXML() {
+		Deprecation::notice('3.0', 'Use DBField->XML() instead.');
 		return str_replace(array('&','<','>','"'), array('&amp;','&lt;','&gt;','&quot;'), $this->value);
 	}
 	
@@ -335,4 +350,4 @@ class Text extends StringField {
 	}
 }
 
-?>
+
