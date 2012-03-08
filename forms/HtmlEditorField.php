@@ -13,7 +13,7 @@ class HtmlEditorField extends TextareaField {
 	 */
 	static $use_gzip = true;
 
-	protected $rows = 30;
+	protected $rows = null;
 	
 	/**
 	 * Includes the JavaScript neccesary for this field to work using the {@link Requirements} system.
@@ -69,8 +69,15 @@ class HtmlEditorField extends TextareaField {
 					$link->setAttribute('class', ($class ? "$class ss-broken" : 'ss-broken'));
 				}
 			}
+
+			if(preg_match('/\[file_link id=([0-9]+)\]/i', $link->getAttribute('href'), $matches)) {
+				if(!DataObject::get_by_id('File', $matches[1])) {
+					$class = $link->getAttribute('class');
+					$link->setAttribute('class', ($class ? "$class ss-broken" : 'ss-broken'));
+				}
+			}
 		}
-		
+
 		return $this->createTag (
 			'textarea',
 			$this->getAttributes(),
@@ -83,7 +90,6 @@ class HtmlEditorField extends TextareaField {
 			parent::getAttributes(),
 			array(
 				'tinymce' => 'true',
-				'style'   => 'width: 97%; height: ' . ($this->rows * 16) . 'px', // prevents horizontal scrollbars
 				'value' => null,
 			)
 		);
@@ -307,7 +313,7 @@ class HtmlEditorField_Toolbar extends RequestHandler {
 					$siteTree,
 					new TextField('external', _t('HtmlEditorField.URL', 'URL'), 'http://'),
 					new EmailField('email', _t('HtmlEditorField.EMAIL', 'Email address')),
-					new TreeDropdownField('file', _t('HtmlEditorField.FILE', 'File'), 'File', 'Filename', 'Title', true),
+					new TreeDropdownField('file', _t('HtmlEditorField.FILE', 'File'), 'File', 'ID', 'Title', true),
 					new TextField('Anchor', _t('HtmlEditorField.ANCHORVALUE', 'Anchor')),
 					new TextField('Description', _t('HtmlEditorField.LINKDESCR', 'Link description')),
 					new CheckboxField('TargetBlank', _t('HtmlEditorField.LINKOPENNEWWIN', 'Open link in a new window?')),
@@ -425,7 +431,7 @@ class HtmlEditorField_Toolbar extends RequestHandler {
 				$file = null;	
 			} else {
 				$url = Director::makeRelative($request->getVar('FileURL'));
-				$url = ereg_replace('_resampled/[^-]+-','',$url);
+				$url = preg_replace('/_resampled/[^-]+-/', '', $url);
 				$file = DataList::create('File')->filter('Filename', $url)->first();	
 				if(!$file) $file = new File(array('Title' => basename($url)));	
 			}
@@ -497,7 +503,29 @@ class HtmlEditorField_Toolbar extends RequestHandler {
 	 * @return FieldList
 	 */
 	protected function getFieldsForImage($url, $file) {
+		$formattedImage = $file->getFormattedImage('SetWidth', Image::$asset_preview_width);
+		$thumbnail = $formattedImage ? $formattedImage->URL : '';
+		$previewField = new LiteralField("ImageFull",
+			"<img id='thumbnailImage' class='thumbnail-preview' src='{$thumbnail}?r=" . rand(1,100000)  . "' alt='{$file->Name}' />\n"
+		);
+
 		$fields = new FieldList(
+			$filePreview = FormField::create('CompositeField', 
+				FormField::create('CompositeField',
+					$previewField
+				)->setName("FilePreviewImage")->addExtraClass('cms-file-info-preview'),
+				FormField::create('CompositeField',
+					FormField::create('CompositeField', 
+						new ReadonlyField("FileType", _t('AssetTableField.TYPE','File type') . ':', $file->FileType),
+						new ReadonlyField("Size", _t('AssetTableField.SIZE','File size') . ':', $file->getSize()),
+						$urlField = new ReadonlyField('ClickableURL', _t('AssetTableField.URL','URL'),
+							sprintf('<a href="%s" target="_blank">%s</a>', $file->Link(), $file->RelativeLink())
+						),
+						new DateField_Disabled("Created", _t('AssetTableField.CREATED','First uploaded') . ':', $file->Created),
+						new DateField_Disabled("LastEdited", _t('AssetTableField.LASTEDIT','Last changed') . ':', $file->LastEdited)
+					)
+				)->setName("FilePreviewData")->addExtraClass('cms-file-info-data')
+			)->setName("FilePreview")->addExtraClass('cms-file-info'),
 			new TextField(
 				'AltText', 
 				_t('HtmlEditorField.IMAGEALTTEXT', 'Alternative text (alt) - shown if image cannot be displayed'), 
@@ -524,6 +552,7 @@ class HtmlEditorField_Toolbar extends RequestHandler {
 				$heightField = new TextField('Height', " x " . _t('HtmlEditorField.IMAGEHEIGHTPX', 'Height'), $file->Height)
 			)
 		);
+		$urlField->dontEscape = true;
 		$dimensionsField->addExtraClass('dimensions');
 		$widthField->setMaxLength(5);
 		$heightField->setMaxLength(5);
@@ -583,6 +612,7 @@ class HtmlEditorField_File extends ViewableData {
 	function __construct($url, $file = null) {
 		$this->url = $url;
 		$this->file = $file;
+		$this->failover = $file;
 
 		parent::__construct();
 	}

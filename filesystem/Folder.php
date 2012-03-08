@@ -261,13 +261,13 @@ class Folder extends File {
 			$oldFile = $file;
 			
 			if(strpos($file, '.') !== false) {
-				$file = ereg_replace('[0-9]*(\.[^.]+$)', $i . '\\1', $file);
+				$file = preg_replace('/[0-9]*(\.[^.]+$)/', $i . '\\1', $file);
 			} elseif(strpos($file, '_') !== false) {
-				$file = ereg_replace('_([^_]+$)', '_' . $i, $file);
+				$file = preg_replace('/_([^_]+$)/', '_' . $i, $file);
 			} else {
-				$file .= "_$i";
+				$file .= '_'.$i;
 			}
-			
+
 			if($oldFile == $file && $i > 2) user_error("Couldn't fix $file$ext with $i", E_USER_ERROR);
 		}
 		
@@ -407,88 +407,17 @@ class Folder extends File {
 	 * and implemeting updateCMSFields(FieldList $fields) on that extension.
 	 */
 	function getCMSFields() {
-		$config = GridFieldConfig::create();
-		$config->addComponent(new GridFieldSortableHeader());
-		$config->addComponent(new GridFieldFilter());
-		$config->addComponent(new GridFieldDefaultColumns());
-		$config->addComponent(new GridFieldPaginator(10));
-		$config->addComponent(new GridFieldAction_Delete());
-		$config->addComponent(new GridFieldAction_Edit());
-		$config->addComponent($gridFieldForm = new GridFieldPopupForms(Controller::curr(), 'EditForm'));
-		$gridFieldForm->setTemplate('CMSGridFieldPopupForms');
-		
-		if($this->ID) {
-			// When a specific folder is selected, show only children files,
-			// and include children folders to allow navigating into them.
-			$files = DataList::create('File')
-				->filter('ParentID', $this->ID)
-				->sort('(CASE WHEN "ClassName" = \'Folder\' THEN 0 ELSE 1 END)');	
+		// Hide field on root level, which can't be renamed
+		if(!$this->ID || $this->ID === "root") {
+			$titleField = new HiddenField("Name");	
 		} else {
-			// On the root folder, show all files but exclude folders - newest first.
-			$files = DataList::create('File')
-				->exclude('ClassName', 'Folder')
-				->sort('Created', 'Desc');
+			$titleField = new TextField("Name", $this->fieldLabel('Name'));
 		}
-		
-		$gridField = new GridField('File','Files', $files, $config);
-		$gridField->setDisplayFields(array(
-			'StripThumbnail' => '',
-			// 'Parent.FileName' => 'Folder',
-			'Title'=>'Title',
-			'Date'=>'Created',
-			'Size'=>'Size',
-		));
-		$gridField->setFieldFormatting(array(
-			'Date' => 'Nice'
-		));
-
-		$titleField = ($this->ID && $this->ID != "root") ? new TextField("Title", _t('Folder.TITLE')) : new HiddenField("Title");
-
-		if($this->canCreate()) {
-			$uploadBtn = new LiteralField(
-				'UploadButton', 
-				sprintf(
-					'<a class="ss-ui-button ss-ui-action-constructive icon-accept cms-panel-link" data-target-panel=".cms-content" href="%s">%s</a>',
-					Controller::join_links(singleton('CMSFileAddController')->Link(), '?ID=' . $this->ID),
-					_t('Folder.UploadFilesButton', 'Upload')
-				)
-			);	
-		} else {
-			$uploadBtn = null;
-		}
-
-		if(!$this->hasMethod('canAddChildren') || ($this->hasMethod('canAddChildren') && $this->canAddChildren())) {
-			$addFolderBtn = new LiteralField(
-				'AddFolderButton', 
-				sprintf(
-					'<a class="ss-ui-button ss-ui-action-constructive icon-accept cms-page-add-button" href="%s">%s</a>',
-					singleton('CMSFileAddController')->Link(),
-					_t('Folder.AddFolderButton', 'Add folder')
-				)
-			);
-		} else {
-			$addFolderBtn = '';
-		}
-		
 		
 		$fields = new FieldList(
-			// The tabs of Root are used to generate the top tabs 
-			new TabSet('Root',
-				new Tab('listview', _t('AssetAdmin.ListView', 'List View'),
-					$titleField,
-					$actionsComposite = new CompositeField(
-						$uploadBtn,
-						$addFolderBtn
-					),
-					$gridField,
-					new HiddenField("ID"),
-					new HiddenField("DestFolderID")
-				)
-			)			
+			$titleField,
+			new HiddenField('ParentID')
 		);
-		
-		$actionsComposite->addExtraClass('cms-actions-row');
-
 		$this->extend('updateCMSFields', $fields);
 		
 		return $fields;

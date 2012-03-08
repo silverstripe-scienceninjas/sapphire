@@ -22,7 +22,14 @@ $gf_colour_zebra: #F0F4F7;
 $gf_colour_font: #666;
 $gf_colour_text_shadow: rgba(0,0,0,.3);
 $gf_border_radius:	7px;
+$gf_color_border_filter_button: #9A9A9A;
+$gf_color_button: #e6e6e6;
+$gf_color_button_filter_hover: #338DC1;
+$gf_color_button_reset_hover: #FF0000;
+$color-text-light: white;
 
+$gf_grid_y:	12px;
+$gf_grid_x:	16px;
 
 @mixin box-shadow-none {
 	-moz-box-shadow: none;
@@ -31,9 +38,9 @@ $gf_border_radius:	7px;
 }
 
 .cms {
-	fieldset.ss-gridfield {
+	.ss-gridfield {
 		& > div {
-			margin-bottom: 35px;
+			margin-bottom: $gf_grid_y*3 - 1;
 		}
 
 		&[data-selectable] {
@@ -47,11 +54,10 @@ $gf_border_radius:	7px;
 		}
 	}
 
-	table.ss-gridfield.field {
+	table.ss-gridfield-table {
 		display: table; 
 		box-shadow: none;		
 		padding: 0;
-		margin: 20px 0 0 0;
 		border-collapse: separate;	
 		border-bottom: 0 none;				
 		width: 100%;
@@ -59,19 +65,46 @@ $gf_border_radius:	7px;
 		thead {
 			color: darken($gf_colour_base, 50%);	
 			background: transparent;
+			tr.filter-header {
+				.fieldgroup {
+					max-width:$gf_grid_x*32;
+				}
+			}
 		}
 		
 		tbody {
 			background: #FFF;
 			td {
-				/* Emulate a link by default */
 				button {
 					border: none;
 					background: none;
-					margin: 0 0 0 2px;
+					margin: 0 0 0 $gf_grid_x/8;
 					padding: 0;
 					width: auto;
 					text-shadow: none;
+					&.gridfield-button-delete.ui-state-hover {
+						background:none;
+						@include box-shadow-none;
+					}
+					&.gridfield-button-delete.ui-state-active {
+						border:none;
+						@include box-shadow-none;
+					}
+					&.gridfield-button-unlink.ui-state-hover {
+						background:none;
+						@include box-shadow-none;
+					}
+					&.gridfield-button-unlink.ui-state-active {
+						border:none;
+						@include box-shadow-none;
+					}
+				}
+				a.edit-link {
+					display:inline-block;
+					width:$gf_grid_x + 4;
+					height:$gf_grid_y*2 - 4;
+					text-indent:-9999em;
+					background: url(../images/icons/document--pencil.png) no-repeat 0 1px;
 				}				
 			}			
 		}
@@ -87,11 +120,37 @@ $gf_border_radius:	7px;
 			}
 		}
 		
-		tr {			
-			&.sortable-header {
+		tr {	
+			&.title {
+				@include border-top-radius($gf_border_radius);
 				th {
+					position: relative;
 					background: $gf_colour_gradient_dark;
+					border-top: 1px solid $gf_colour_border;
+					padding: 5px;
+					min-height: $gf_grid_y*3 + 4;
+					@include background-image(linear-gradient($gf_colour_gradient_light, $gf_colour_gradient_dark));
+					@include border-top-radius($gf_border_radius);
+					@include single-text-shadow($gf_colour_text_shadow, 0px, -1px, 0);
+					h2{
+						padding: 0px;
+						font-size: $gf_grid_y*1.4;
+						color:#fff;
+						margin:$gf_grid_y/4 $gf_grid_x/2 0;
+						display:inline-block;
+					}
+					.new{
+						font-size: $gf_grid_y*1.2; 
+						float: right;
+					}
 				}
+			}	
+			&.sortable-header {
+				background: $gf_colour_subheader;	
+				th{
+					padding: 0px;
+				}
+				
 			}			
 			&:hover {
 				background: #FFFAD6 !important;
@@ -112,27 +171,27 @@ $gf_border_radius:	7px;
 			
 			th {
 				font-weight: bold;
-				font-size: 12px;
+				font-size: $gf_grid_y;
 				color: #FFF;
 				padding: 5px;
 				border-right: 1px solid $gf_colour_border;
 				&.main:first-child{
-					@include border-top-left-radius($gf_border_radius);
+					//@include border-top-left-radius($gf_border_radius);
 				}
 				&.main:last-child{
-					@include border-top-right-radius($gf_border_radius);
+					//@include border-top-right-radius($gf_border_radius);
 				}
 				div {
 					&.fieldgroup,&.fieldgroup-field {
-						width: auto;
+						width: 100%;
+						position:relative;
 					}
 					&.fieldgroup {
-						min-width: 200px;
+						min-width: $gf_grid_x*12.5;
 						padding-right:0;
 					}
 				}
 				&.extra,&.action {
-					background: $gf_colour_gradient_dark;
 					padding: 0;
 					cursor: default;
 					button,button:hover {
@@ -145,11 +204,11 @@ $gf_border_radius:	7px;
 				&.main{
 					border-top: 1px solid $gf_colour_border;
 					color:#fff;
-					@include background-image(linear-gradient($gf_colour_gradient_light, $gf_colour_gradient_dark));
+					background: darken($gf_colour_subheader,10%);
+					border-bottom: 1px solid $gf_colour_border;
 					span{
 						@include single-text-shadow($gf_colour_text_shadow, 0px, -1px, 0);
 					}
-					
 				}
 				&.extra {
 					background: $gf_colour_subheader;		
@@ -159,6 +218,9 @@ $gf_border_radius:	7px;
 						width: auto;
 						display: inline;
 						position: static;
+						input {
+							height:$gf_grid_y*2 + 4;
+						}
 					}
 					button.ss-ui-button {
 						padding: .3em;
@@ -188,32 +250,182 @@ $gf_border_radius:	7px;
 						@include box-shadow-none; 
 					}
 					&.ss-gridfield-sort {
-						background: transparent url(../images/arrows-01.png) no-repeat right 2px;
+						background: transparent url(../images/arrows.png) no-repeat right 6px;
 						border:none;	
 						width:100%;
 						text-align: left;
-						padding: 4px 0;
+						padding: $gf_grid_y/3 0;
 						@include single-text-shadow($gf_colour_text_shadow, 0px, -1px, 0);
 						color: #fff;
 						@include border-radius(0);
+						&:hover {
+							background-position: right -34px;
+						}
+						&.ss-gridfield-sorted-desc {
+							background-position: right -72px;
+						}
+						&.ss-gridfield-sorted-asc {
+							background-position: right -116px;
+						}
+					}
+					&.ss-gridfield-button-filter.ss-ui-button{
+						position:absolute;
+						right:$gf_grid_x/2 - 1;
+						top:$gf_grid_y*-2 - 4;
+						display:block;
+						text-indent:-9999em;
+						width:$gf_grid_x*2 - 2;
+						height:$gf_grid_y*2 + 4;
+						border: {
+							top-left-radius:0px;
+							bottom-left-radius:0px;
+							top-right-radius:4px;
+							bottom-right-radius:4px;
+							bottom-width:1px;
+							color:$gf_color_border_filter_button;
+						}
+						@include background (url(../images/icons/filter-icons.png) no-repeat -40px 6px,
+							linear-gradient(
+								lighten($gf_color_button, 10%),
+								darken($gf_color_button, 5%)
+							));
+						&.hover-alike:active {
+							@include background (url(../images/icons/filter-icons.png) no-repeat -16px 6px,
+							linear-gradient(
+								lighten($gf_color_button_filter_hover, 5%), 
+								darken($gf_color_button_filter_hover, 5%)
+							));
+							@include box-shadow(inset 0 1px 3px rgb(23, 24, 26), 0 1px 0 rgba(255, 255, 255, .6));
+						}
+						&.hover-alike {
+							@include background (url(../images/icons/filter-icons.png) no-repeat -16px 6px,
+							linear-gradient(
+								lighten($gf_color_button_filter_hover, 5%), 
+								darken($gf_color_button_filter_hover, 5%)
+							));
+						}
+					}
+					&.ss-gridfield-button-reset.ss-ui-button{
+						position:absolute;
+						right:$gf_grid_x*2 + 4;
+						top:$gf_grid_y*-2 - 4;
+						display:block;
+						text-indent:-9999em;
+						width:$gf_grid_x*2 - 2;
+						height:$gf_grid_y*2 + 4;
+						float:right;
+						border: {
+							radius:0px;
+							bottom-width:1px;
+							color:$gf_color_border_filter_button;
+						}
+						@include background (url(../images/icons/filter-icons.png) no-repeat 8px 5px,
+							linear-gradient(color-stops(
+								lighten($gf_color_button, 10%),
+								darken($gf_color_button, 5%)
+							))
+						);
+						&.filtered:hover {
+							@include background (url(../images/icons/filter-icons.png) no-repeat 8px -17px,
+							linear-gradient(
+								$gf_color_button_reset_hover, 
+								darken($gf_color_button_reset_hover, 10%)
+							));
+						}
+						&.filtered:active {
+							@include background (url(../images/icons/filter-icons.png) no-repeat 8px -17px,
+							linear-gradient(
+								$gf_color_button_reset_hover, 
+								darken($gf_color_button_reset_hover, 10%)
+							));
+							@include box-shadow(inset 0 1px 3px rgb(23, 24, 26), 0 1px 0 rgba(255, 255, 255, .6));
+						}
 					}		
 				}
+
 				input {
 					&.ss-gridfield-sort {
 						padding: 2px;
 						&:focus {
 							@include box-shadow-none;
 						}
+
 					}
 				}
+
+				span.non-sortable {
+					padding:1em 1em;
+					display:block;
+				}
 			}
+
 			td {
 				border-right: 1px solid $gf_colour_border;
-				padding: 7px 12px;
+				padding: $gf_grid_x/2.5 $gf_grid_y;
 				color: $gf_colour_font;
 				&.bottom-all {
 					@include border-bottom-radius($gf_border_radius);
-					@include background-image(linear-gradient($gf_colour_gradient_light, $gf_colour_gradient_dark));	
+					@include background-image(linear-gradient($gf_colour_gradient_light, $gf_colour_gradient_dark));
+					.datagrid-pagination {
+						padding-top:2px;
+						position:absolute;
+						left:50%;
+						margin-left:$gf_grid_x*-7 - 4;
+						.pagination-page-number {
+							color:$color-text-light;
+							input {
+								width:$gf_grid_x*2 + 3;
+								height:$gf_grid_y*2 - 4;
+								margin-bottom:-$gf_grid_y/2;
+								padding:0px;
+							}
+						}
+						button.ss-gridfield-previouspage {
+							@include background (url(../images/icons/pagination-arrows.png) no-repeat -23px 7px);
+							@include box-shadow-none;
+							border:none;
+							width:$gf_grid_x - 6;
+							margin:0 ($gf_grid_x - 6);
+							span {
+								text-indent:-9999em;
+							}
+						}
+						button.ss-gridfield-nextpage {
+							@include background (url(../images/icons/pagination-arrows.png) no-repeat -47px 7px);
+							@include box-shadow-none;
+							border:none;
+							width:$gf_grid_x - 6;
+							margin:0 ($gf_grid_x - 6);
+							span {
+								text-indent:-9999em;
+							}
+						}
+						button.ss-gridfield-firstpage {
+							@include background (url(../images/icons/pagination-arrows.png) no-repeat 0px 7px);
+							@include box-shadow-none;
+							border:none;
+							width:$gf_grid_x - 6;
+							margin:0 ($gf_grid_x - 6);
+							span {
+								text-indent:-9999em;
+							}
+						}
+						button.ss-gridfield-lastpage {
+							@include background (url(../images/icons/pagination-arrows.png) no-repeat -73px 7px);
+							@include box-shadow-none;
+							border:none;
+							width:$gf_grid_x - 6;
+							margin:0 ($gf_grid_x - 6);
+							span {
+								text-indent:-9999em;
+							}
+						}
+					}
+					.pagination-records-number {
+						float:right;
+						padding:($gf_grid_y/2) 0;
+						color:$color-text-light;
+					}
 				}
 			}
 			&.last td {

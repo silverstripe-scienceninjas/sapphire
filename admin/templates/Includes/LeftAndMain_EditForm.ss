@@ -3,6 +3,13 @@
 <% end_if %>
 	<div class="cms-content-header north">
 		<div>
+			
+			<% if Backlink %>
+				<a class="backlink ss-ui-button cms-panel-link" data-icon="back" href="$Backlink">
+					<% _t('Back', 'Back') %>
+				</a>
+			<% end_if %>
+
 			<h2 id="page-title-heading">
 			<% control Controller %>
 				<% include CMSBreadcrumbs %>
@@ -13,7 +20,7 @@
 				<div class="cms-content-header-tabs">
 					<ul>
 					<% control Tabs %>
-						<li><a href="#$id">$Title</a></li>
+						<li><a href="#$id"<% if extraClass %> class="$extraClass"<% end_if %>>$Title</a></li>
 					<% end_control %>
 					</ul>
 				</div>
@@ -21,6 +28,7 @@
 			<% end_if %>
 	
 			<!-- <div class="cms-content-search">...</div> -->
+
 		</div>
 	</div>
 
@@ -28,7 +36,7 @@
 		$EditFormTools	
 	<% end_control %>
 	
-	<div class="cms-content-fields center">
+	<div class="cms-content-fields center cms-panel-padded">
 		<% if Message %>
 		<p id="{$FormName}_error" class="message $MessageType">$Message</p>
 		<% else %>

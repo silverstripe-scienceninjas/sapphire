@@ -1,5 +1,5 @@
 <?php
-class GridFieldtest extends SapphireTest {
+class GridFieldTest extends SapphireTest {
 
 	/**
 	 * @covers GridField::__construct
@@ -29,11 +29,12 @@ class GridFieldtest extends SapphireTest {
 		$obj = new GridField('testfield', 'testfield');
 
 		$expectedComponents = new ArrayList(array(
-			0 => new GridFieldSortableHeader,
-			1 => new GridFieldFilter,
-			2 => new GridFieldDefaultColumns,
-			3 => new GridFieldPaginator,
-			4 => new GridState_Component,
+			new GridFieldTitle(),
+			new GridFieldSortableHeader,
+			new GridFieldFilter,
+			new GridFieldDefaultColumns,
+			new GridFieldPaginator,
+			new GridState_Component,
 		));
 		
 		$this->assertEquals($expectedComponents, $obj->getConfig()->getComponents(), 'Testing default Config');
@@ -188,7 +189,7 @@ class GridFieldtest extends SapphireTest {
 			new Member(array("ID" => 1, "Email" => "test@example.org" ))
 		));
 		$obj = new GridField('testfield', 'testfield', $list);
-		$this->assertEquals(array(), $obj->getColumnAttributes($list->first(), 'Email'));
+		$this->assertEquals(array('class' => 'col-Email'), $obj->getColumnAttributes($list->first(), 'Email'));
 	}
 
 	/**
@@ -369,4 +370,22 @@ class GridFieldTest_Component implements GridField_ColumnProvider, GridField_Act
 	}
 
 	
+}
+
+class GridFieldTest_Team extends DataObject implements TestOnly {
+	static $db = array(
+		'Name' => 'Varchar',
+		'City' => 'Varchar'
+	);
+
+	static $many_many = array('Players' => 'GridFieldTest_Player');
+}
+
+class GridFieldTest_Player extends DataObject implements TestOnly {
+	static $db = array(
+		'Name' => 'Varchar',
+		'Email' => 'Varchar',
+	);
+
+	static $belongs_many_many = array('Teams' => 'GridFieldTest_Team');
 }

@@ -281,7 +281,7 @@ $lang['en_US']['Group']['Parent'] = array(
 	PR_MEDIUM,
 	'One group has one parent group'
 );
-$lang['en_US']['Group']['RolesAddEditLink'] = 'Add/edit roles';
+$lang['en_US']['Group']['RolesAddEditLink'] = 'Manage roles';
 $lang['en_US']['Group']['SINGULARNAME'] = array(
 	'Group',
 	50,
@@ -706,7 +706,6 @@ $lang['en_US']['Security']['CHANGEPASSWORDBELOW'] = 'You can change your passwor
 $lang['en_US']['Security']['CHANGEPASSWORDHEADER'] = 'Change your password';
 $lang['en_US']['Security']['ENTERNEWPASSWORD'] = 'Please enter a new password.';
 $lang['en_US']['Security']['ERRORPASSWORDPERMISSION'] = 'You must be logged in in order to change your password!';
-$lang['en_US']['Security']['IPADDRESSES'] = 'IP Addresses';
 $lang['en_US']['Security']['LOGGEDOUT'] = 'You have been logged out.  If you would like to log in again, enter your credentials below.';
 $lang['en_US']['Security']['LOGIN'] = 'Log in';
 $lang['en_US']['Security']['LOSTPASSWORDHEADER'] = 'Lost Password';
@@ -717,19 +716,10 @@ $lang['en_US']['Security']['PASSWORDSENTHEADER'] = 'Password reset link sent to 
 $lang['en_US']['Security']['PASSWORDSENTTEXT'] = 'Thank you! A reset link has been sent to  \'%s\', provided an account exists for this email address.';
 $lang['en_US']['SecurityAdmin']['ADDMEMBER'] = 'Add Member';
 $lang['en_US']['SecurityAdmin']['APPLY_ROLES'] = 'Apply roles to groups';
-$lang['en_US']['SecurityAdmin']['APPLY_ROLES_HELP'] = 'Ability to edit the roles assigned to a group. Requires the "Access to \'Security\' section" permission.';
+$lang['en_US']['SecurityAdmin']['APPLY_ROLES_HELP'] = 'Ability to edit the roles assigned to a group. Requires the "Access to \'Users\' section" permission.';
 $lang['en_US']['SecurityAdmin']['EDITPERMISSIONS'] = 'Manage permissions for groups';
 $lang['en_US']['SecurityAdmin']['EDITPERMISSIONS_HELP'] = 'Ability to edit Permissions and IP Addresses for a group. Requires the "Access to \'Security\' section" permission.';
 $lang['en_US']['SecurityAdmin']['GROUPNAME'] = 'Group name';
-$lang['en_US']['SecurityAdmin']['IPADDRESSESHELP'] = '<p>You can restrict this group to a particular 
-						IP address range (one range per line). <br />Ranges can be in any of the following forms: <br />
-						203.96.152.12<br />
-						203.96.152/24<br />
-						203.96/16<br />
-						203/8<br /><br />If you enter one or more IP address ranges in this box, then members will only get
-						the rights of being in this group if they log on from one of the valid IP addresses.  It won\'t prevent
-						people from logging in.  This is because the same user might have to log in to access parts of the
-						system without IP address restrictions.';
 $lang['en_US']['SecurityAdmin']['MEMBERS'] = 'Members';
 $lang['en_US']['SecurityAdmin']['MENUTITLE'] = array(
 	'Users',
@@ -740,7 +730,7 @@ $lang['en_US']['SecurityAdmin']['MemberListCaution'] = 'Caution: Removing member
 $lang['en_US']['SecurityAdmin']['NEWGROUP'] = 'New Group';
 $lang['en_US']['SecurityAdmin']['PERMISSIONS'] = 'Permissions';
 $lang['en_US']['SecurityAdmin']['ROLES'] = 'Roles';
-$lang['en_US']['SecurityAdmin']['ROLESDESCRIPTION'] = 'This section allows you to add roles to this group. Roles are logical groupings of permissions, which can be editied in the Roles tab';
+$lang['en_US']['SecurityAdmin']['ROLESDESCRIPTION'] = 'Roles are predefined sets of permissions, and can be assigned to groups.<br />They are inherited from parent groups if required.';
 $lang['en_US']['SecurityAdmin']['SGROUPS'] = 'Security Groups';
 $lang['en_US']['SecurityAdmin']['TABIMPORT'] = 'Import';
 $lang['en_US']['SecurityAdmin']['TABROLES'] = 'Roles';

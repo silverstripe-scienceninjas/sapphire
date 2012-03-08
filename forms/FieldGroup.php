@@ -79,12 +79,12 @@ class FieldGroup extends CompositeField {
 				if($subfield->getName()) $count++;
 			}
 			if($count == 1) $compositeTitle .= 'Group';
-			return ereg_replace("[^a-zA-Z0-9]+","",$compositeTitle);
+			return preg_replace("/[^a-zA-Z0-9]+/", "", $compositeTitle);
 		}
 
-		return ereg_replace("[^a-zA-Z0-9]+","",$this->title);	
+		return preg_replace("/[^a-zA-Z0-9]+/", "", $this->title);
 	}
-	
+
 	/**
 	 * Returns a set of <span class="subfield"> tags, each containing a sub-field.
 	 * You can also use <% control FieldSet %>, if you'd like more control over the generated HTML
@@ -97,14 +97,21 @@ class FieldGroup extends CompositeField {
     	$spaceZebra = isset($this->zebra) ? " fieldgroup-$this->zebra" : '';
     	$idAtt = isset($this->id) ? " id=\"{$this->id}\"" : '';
 		$content = "<div class=\"fieldgroup$spaceZebra\"$idAtt>";
-		
+
+		$count = 1;
 		foreach($fs as $subfield) {
 			$childZebra = (!isset($childZebra) || $childZebra == "odd") ? "even" : "odd";
 			if($subfield->hasMethod('setZebra'))  {
 				$subfield->setZebra($childZebra);
 			}
-			
-			$content .= "<div class=\"fieldgroup-field\">" . $subfield->{$this->subfieldParam}() . "</div>";
+
+			//label the first and last fields of each surrounding div
+			if ($count == 1) $firstLast = "first";
+			elseif ($count == count($fs)) $firstLast = "last";
+			else $firstLast = '';
+
+			$content .= "<div class=\"fieldgroup-field $firstLast\">" . $subfield->{$this->subfieldParam}() . "</div>";
+			$count++;
 		}
 		$content .= "</div>";
 		

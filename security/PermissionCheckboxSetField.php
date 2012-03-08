@@ -180,7 +180,7 @@ class PermissionCheckboxSetField extends FormField {
 					$odd = ($odd + 1) % 2;
 					$extraClass = $odd ? 'odd' : 'even';
 					$extraClass .= ' val' . str_replace(' ', '', $code);
-					$itemID = $this->id() . '_' . ereg_replace('[^a-zA-Z0-9]+', '', $code);
+					$itemID = $this->id() . '_' . preg_replace('/[^a-zA-Z0-9]+/', '', $code);
 					$checked = $disabled = $inheritMessage = '';
 					$checked = (isset($uninheritedCodes[$code]) || isset($inheritedCodes[$code])) ? ' checked="checked"' : '';
 					$title = $permission['help'] ? 'title="' . htmlentities($permission['help'], ENT_COMPAT, 'UTF-8') . '" ' : '';
@@ -226,6 +226,9 @@ class PermissionCheckboxSetField extends FormField {
 		}
 		
 		if($fieldname && $record && ($record->has_many($fieldname) || $record->many_many($fieldname))) {
+			
+			if(!$record->ID) $record->write(); // We need a record ID to write permissions
+			
 			$idList = array();
 			if($this->value) foreach($this->value as $id => $bool) {
 			   if($bool) {

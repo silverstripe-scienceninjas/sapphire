@@ -148,7 +148,7 @@ class DatetimeField extends FormField {
 					unset($userValueObj);
 				} else {
 					// Validation happens later, so set the raw string in case Zend_Date doesn't accept it
-					$this->value = sprintf($this->getConfig('datetimeorder'), $val['date'], $val['time']);
+					$this->value = trim(sprintf($this->getConfig('datetimeorder'), $val['date'], $val['time']));
 				}
 				
 				if($userTz) date_default_timezone_set($dataTz);
@@ -298,7 +298,7 @@ class DatetimeField_Readonly extends DatetimeField {
 			$format = sprintf(
 				$this->getConfig('datetimeorder'), 
 				$this->dateField->getConfig('dateformat'), 
-				$this->dateField->getConfig('timeformat')
+				$this->timeField->getConfig('timeformat')
 			);
 			$valueObj = new Zend_Date(
 				sprintf($this->getConfig('datetimeorder'), $valDate, $valTime),

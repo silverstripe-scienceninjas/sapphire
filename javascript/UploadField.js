@@ -30,6 +30,8 @@
 			Config: null,
 
 			onmatch: function() {
+				if(this.is('.readonly,.disabled')) return;
+
 				var fileInput = this.find('input');
 				var dropZone = this.find('.ss-uploadfield-dropzone');
 				var config = $.parseJSON(fileInput.data('config').replace(/'/g,'"'));
@@ -38,7 +40,10 @@
 				this.fileupload($.extend(true, 
 					{
 						formData: function(form) {
-							return [{name: 'SecurityID', value: $(form).find(':input[name=SecurityID]').val()}];
+							return [
+								{name: 'SecurityID', value: $(form).find(':input[name=SecurityID]').val()},
+								{name: 'ID', value: $(form).find(':input[name=ID]').val()}
+							];
 						},
 						errorMessages: {
 							// errorMessages for all error codes suggested from the plugin author, some will be overwritten by the config comming from php
@@ -99,7 +104,7 @@
 
 				// TODO Allow single-select
 				dialog.find('iframe').bind('load', function(e) {
-					var contents = $(this).contents(), gridField = contents.find('fieldset.ss-gridfield');
+					var contents = $(this).contents(), gridField = contents.find('.ss-gridfield');
 					// TODO Fix jQuery custom event bubbling across iframes on same domain
 					// gridField.find('.ss-gridfield-items')).bind('selectablestop', function() {
 					// });
@@ -192,32 +197,30 @@
 					this.siblings().toggleClass('ui-state-disabled');
 					editform.toggleEditForm();
 				}
+				e.preventDefault(); // Avoid a form submit
 			}
 		});
 		$('div.ss-upload .ss-uploadfield-item-editform').entwine({
-			EditFormVisible: false,
 			fitHeight: function() {
-				var iframe = this.find('iframe'),
-					h = iframe.contents().height() + 'px';
-				iframe.css('height', h);
-				return h;
-			},
-			showEditForm: function() {
-				return this.stop().animate({height: this.fitHeight()});
-			},
-			hideEditFormShow: function() {
-				return this.stop().animate({height: 0});
+				var iframe = this.find('iframe'), h = iframe.contents().height();
+				// Set iframe to match its contents height
+				iframe.height(h); 
+				// set container to match the same height
+				iframe.parent().height(h);
 			},
 			toggleEditForm: function() {
-				if (this.getEditFormVisible()) this.hideEditFormShow();
-				else this.showEditForm();
-				this.setEditFormVisible(!this.getEditFormVisible());
+				if(this.height() === 0) {
+					this.fitHeight();	
+				} else {
+					this.height(0);
+				}
 			}
 		});
 		$('div.ss-upload .ss-uploadfield-item-editform iframe').entwine({
 			onmatch: function() {
+				// TODO entwine event binding doesn't work for iframes
 				this.load(function() {
-					$(this).parent().removeClass('loading');
+					$(this).parent().removeClass('loading');	
 				});
 			}
 		});

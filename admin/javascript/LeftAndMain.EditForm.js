@@ -2,6 +2,14 @@
  * File: LeftAndMain.EditForm.js
  */
 (function($) {
+	
+	// Can't bind this through jQuery
+	window.onbeforeunload = function(e) {
+		var form = $('.cms-edit-form');
+		form.trigger('beforesave');
+		if(form.is('.changed')) return ss.i18n._t('LeftAndMain.CONFIRMUNSAVEDSHORT');
+	};
+
 	$.entwine('ss', function($){
 
 		/**
@@ -52,15 +60,9 @@
 			
 				this._setupChangeTracker();
 
-				// Can't bind this through jQuery
-				window.onbeforeunload = function(e) {
-					self.trigger('beforesave');
-					if(self.is('.changed')) return ss.i18n._t('LeftAndMain.CONFIRMUNSAVEDSHORT');
-				};
-
 				// Catch navigation events before they reach handleStateChange(),
 				// in order to avoid changing the menu state if the action is cancelled by the user
-				$('.cms-menu')
+				// $('.cms-menu')
 				
 				// focus input on first form element
 				this.find(':input:visible:not(:submit):first').focus();
@@ -172,24 +174,18 @@
 		 * We need this onclick overloading because we can't get to the
 		 * clicked button from a form.onsubmit event.
 		 */
-		$('.cms-edit-form .Actions input, .cms-edit-form .Actions button').entwine({
+		$('.cms-edit-form .Actions :submit').entwine({
 			
 			/**
 			 * Function: onclick
 			 */
 			onclick: function(e) {
 				$('.cms-content').submitForm(this.parents('form'), this);
+				e.preventDefault();
 				return false;
 			}
 		});
 
-		$('.cms-edit-form .ss-gridfield .action-edit').entwine({
-			onclick: function(e) {
-				$('.cms-container').loadPanel(this.attr('href'), '', {selector: '.cms-edit-form'});
-				e.preventDefault();
-			}
-		});
-		
 	});
 
 }(jQuery));

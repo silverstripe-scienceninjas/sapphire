@@ -28,14 +28,21 @@ class GridFieldSortableHeader implements GridField_HTMLProvider, GridField_DataM
 					$dir = 'desc';
 				}
 				
-				$field = new GridField_Action($gridField, 'SetOrder'.$columnField, $title, "sort$dir", array('SortColumn' => $columnField));
+				$field = Object::create(
+					'GridField_FormAction', $gridField, 'SetOrder'.$columnField, $title, 
+					"sort$dir", array('SortColumn' => $columnField)
+				)->addExtraClass('ss-gridfield-sort');
 
-				$field->addExtraClass('ss-gridfield-sort');
 				if($state->SortColumn == $columnField){
 					$field->addExtraClass('ss-gridfield-sorted');
+
+					if($state->SortDirection == 'asc')
+						$field->addExtraClass('ss-gridfield-sorted-asc');
+					else
+						$field->addExtraClass('ss-gridfield-sorted-desc');
 				}
 			} else {
-				$field = new LiteralField($columnField, $title);
+				$field = new LiteralField($columnField, '<span class="non-sortable">' . $title . '</span>');
 			}
 			$forTemplate->Fields->push($field);
 		}

@@ -5,7 +5,7 @@
  * @package sapphire
  * @subpackage security
  */
-class Member extends DataObject {
+class Member extends DataObject implements TemplateGlobalProvider {
 
 	static $db = array(
 		'FirstName' => 'Varchar',
@@ -939,25 +939,26 @@ class Member extends DataObject {
 
 
 	/**
-	 * Get a "many-to-many" map that holds for all members their group
-	 * memberships
+	 * Get a "many-to-many" map that holds for all members their group memberships,
+	 * including any parent groups where membership is implied.
+	 * Use {@link DirectGroups()} to only retrieve the group relations without inheritance.
 	 *
 	 * @todo Push all this logic into Member_GroupSet's getIterator()?
 	 */
 	public function Groups() {
 		$groups = new Member_GroupSet('Group', 'Group_Members', 'GroupID', 'MemberID');
-		if($this->ID) $groups->setForeignID($this->ID);
+		$groups->setForeignID($this->ID);
 		
-		// Filter out groups that aren't allowed from this IP
-		$ip = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : null;
-		$disallowedGroups = array();
-		foreach($groups as $group) {
-			if(!$group->allowedIPAddress($ip)) $disallowedGroups[] = $groupID;
-		}
-		if($disallowedGroups) $group->where("\"Group\".\"ID\" NOT IN (" .
-			implode(',',$disallowedGroups) . ")");
+		$this->extend('updateGroups', $groups);
 
 		return $groups;
+	}
+
+	/**
+	 * @return ManyManyList
+	 */
+	public function DirectGroups() {
+		return $this->getManyManyComponents('Groups');
 	}
 
 
@@ -1140,12 +1141,15 @@ class Member extends DataObject {
 		// Groups relation will get us into logical conflicts because
 		// Members are displayed within  group edit form in SecurityAdmin
 		$fields->removeByName('Groups');
-		
+
 		if(Permission::check('EDIT_PERMISSIONS')) {
-			$groupsField = new TreeMultiselectField('Groups', false, 'Group');
-			$fields->findOrMakeTab('Root.Groups', singleton('Group')->i18n_plural_name());
-			$fields->addFieldToTab('Root.Groups', $groupsField);
-			
+			$groupsMap = DataList::create('Group')->map('ID', 'Breadcrumbs')->toArray();
+			asort($groupsMap);
+			$fields->addFieldToTab('Root.Main',
+				Object::create('ListboxField', 'DirectGroups', singleton('Group')->i18n_plural_name())
+					->setMultiple(true)->setSource($groupsMap)
+			);
+
 			// Add permission field (readonly to avoid complicated group assignment logic).
 			// This should only be available for existing records, as new records start
 			// with no permissions until they have a group assignment anyway.
@@ -1380,6 +1384,13 @@ class Member extends DataObject {
 		
 		// If can't find a suitable editor, just default to cms
 		return $currentName ? $currentName : 'cms';
+	}
+
+	public static function get_template_global_variables() {
+		return array(
+			'CurrentMember' => 'currentUser',
+			'currentUser'
+		);
 	}
 }
 

@@ -72,20 +72,22 @@ class GridFieldFilter implements GridField_HTMLProvider, GridField_DataManipulat
 				}
 				$field = new TextField('filter['.$columnField.']', '', $value);
 				$field->addExtraClass('ss-gridfield-sort');
+
+				$field = new FieldGroup(
+					$field,
+					Object::create('GridField_FormAction', $gridField, 'filter', false, 'filter', null)
+						->addExtraClass('ss-gridfield-button-filter')
+						->setAttribute('title', _t('GridField.Filter', "Filter"))
+						,
+					Object::create('GridField_FormAction', $gridField, 'reset', false, 'reset', null)
+						->addExtraClass('ss-gridfield-button-reset')
+						->setAttribute('title', _t('GridField.ResetFilter', "Reset"))
+				);
 			} else {
 				$field = new LiteralField('', '');
 			}
+
 			
-			// Last column, inject action buttons
-			if($currentColumn == count($columns)) {
-				$field = new FieldGroup(
-					$field,
-					new GridField_Action($gridField, 'filter', _t('GridField.Filter', "Filter"), 'filter', null),
-					new GridField_Action($gridField, 'reset', _t('GridField.ResetFilter', "Reset"), 'reset', null)
-					);
-				
-			}
-			$field->iteratorProperties($currentColumn-1, count($columns));
 			$forTemplate->Fields->push($field);
 		}
 		

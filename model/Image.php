@@ -72,7 +72,7 @@ class Image extends File {
 		
 		parent::defineMethods();
 	}
-	
+
 	function getCMSFields() {
 		$fields = parent::getCMSFields();
 
@@ -81,19 +81,9 @@ class Image extends File {
 		$urlLink .= "<span class='readonly'><a href='{$this->Link()}'>{$this->RelativeLink()}</a></span>";
 		$urlLink .= "</div>";
 		
-		$big = $this->URL;
-		$formattedImage = $this->getFormattedImage('AssetLibraryPreview');
-		$thumbnail = $formattedImage ? $formattedImage->URL : '';
-		
-		// Hmm this required the translated string to be appended to BottomRoot to add this to the Main tab
-		$fields->addFieldToTab('Root.Main',
-			new ReadonlyField("Dimensions", _t('AssetTableField.DIM','Dimensions'))
-		);
-		$fields->addFieldToTab('Root.Main',
-			new LiteralField("ImageFull",
-				"<img id='thumbnailImage' src='{$thumbnail}?r=" . rand(1,100000)  . "' alt='{$this->Name}' />"
-			)
-		);
+		//attach the addition file information for an image to the existing FieldGroup create in the parent class
+		$fileAttributes = $fields->fieldByName('Root.Main.FilePreview')->fieldByName('FilePreviewData');
+		$fileAttributes->push(new ReadonlyField("Dimensions", _t('AssetTableField.DIM','Dimensions') . ':'));
 
 		return $fields;
 	}
@@ -172,7 +162,7 @@ class Image extends File {
 		while(file_exists(BASE_PATH . "/$file")) {
 			$i = $i ? ($i+1) : 2;
 			$oldFile = $file;
-			$file = ereg_replace('[0-9]*(\.[^.]+$)',$i . '\\1', $file);
+			$file = preg_replace('/[0-9]*(\.[^.]+$)/', $i . '\\1', $file);
 			if($oldFile == $file && $i > 2) user_error("Couldn't fix $file with $i", E_USER_ERROR);
 		}
 		
