@@ -330,12 +330,12 @@ class GridField extends FormField {
 			}
 		}
 
-
-		if ($list->Count() > 0) {
+		if($list->Count() > 0) {
 			foreach($list as $idx => $record) {
+				if(!$record->canView()) continue;
 				$record->iteratorProperties($idx, $list->count());
 				$rowContent = '';
-				foreach($columns as $column) {
+				foreach($this->getColumns() as $column) {
 					$colContent = $this->getColumnContent($record, $column);
 					// A return value of null means this columns should be skipped altogether.
 					if($colContent === null) continue;
@@ -354,7 +354,10 @@ class GridField extends FormField {
 				);
 				$content['body'][] = $row;
 			}
-		} else {    //display a message when the grid field is empty
+		} 
+		
+		// Display a message when the grid field is empty
+		if(!count($content['body'])) {    
 			$row = $this->createTag(
 				'tr',
 				array("class" => 'ss-gridfield-item ss-gridfield-no-items'),
