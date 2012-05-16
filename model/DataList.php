@@ -27,6 +27,12 @@ class DataList extends ViewableData implements SS_List, SS_Filterable, SS_Sortab
 	 * @var DataModel
 	 */
 	protected $model;
+	
+	/**
+	 *
+	 * @var DataListCache
+	 */
+	protected $cache = null;
 
 	/**
 	 * Create a new DataList.
@@ -37,6 +43,7 @@ class DataList extends ViewableData implements SS_List, SS_Filterable, SS_Sortab
 	public function __construct($dataClass) {
 		$this->dataClass = $dataClass;
 		$this->dataQuery = new DataQuery($this->dataClass);
+		$this->cache = new DataListCache();
 		
 		parent::__construct();
 	}
@@ -389,14 +396,20 @@ class DataList extends ViewableData implements SS_List, SS_Filterable, SS_Sortab
 	 */
 	public function toArray() {
 		$query = $this->dataQuery->query();
+		$cacheKey = md5($query->sql()).'.toArray';
+		
+		$result = $this->cache->getCache($cacheKey);
+		if($result !== null) {
+			return $result;
+		}
+		
 		$rows = $query->execute();
 		$results = array();
 		
 		foreach($rows as $row) {
 			$results[] = $this->createDataObject($row);
 		}
-		
-		return $results;
+		return $this->cache->setCache($cacheKey, $results);
 	}
 
 	/**
@@ -475,7 +488,14 @@ class DataList extends ViewableData implements SS_List, SS_Filterable, SS_Sortab
 	 * @return int
 	 */
 	public function count() {
-		return $this->dataQuery->count();
+		$cacheKey = sha1(serialize($this->sql())).'.count';
+		
+		$result = $this->cache->getCache($cacheKey);
+		if($result !== null) {
+			return $result;
+		}
+		
+		return $this->cache->setCache($cacheKey, $this->dataQuery->count());
 	}
 	
 	/**
@@ -525,8 +545,15 @@ class DataList extends ViewableData implements SS_List, SS_Filterable, SS_Sortab
 	 * @return DataObject
 	 */
 	public function first() {
+		$cacheKey = sha1(serialize($this->sql()).'.first');
+		
+		$result = $this->cache->getCache($cacheKey);
+		if($result) {
+			return $result;
+		}
+		
 		foreach($this->dataQuery->firstRow()->execute() as $row) {
-			return $this->createDataObject($row);
+			return $this->cache->setCache($cacheKey, $this->createDataObject($row));
 		}
 	}
 
@@ -627,7 +654,14 @@ class DataList extends ViewableData implements SS_List, SS_Filterable, SS_Sortab
 	 * @return array
 	 */
 	public function column($colName = "ID") {
-		return $this->dataQuery->column($colName);
+		$cacheKey = sha1(serialize($this->sql())).'.col.'.$colName;
+		
+		$result = $this->cache->getCache($cacheKey);
+		if($result !== null) {
+			return $result;
+		}
+		
+		return $this->cache->setCache($cacheKey, $this->dataQuery->column($colName));
 	}
 	
 	// Member altering methods
