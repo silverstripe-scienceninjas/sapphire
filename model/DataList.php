@@ -7,6 +7,15 @@
  * @subpackage model
  */
 class DataList extends ViewableData implements SS_List, SS_Filterable, SS_Sortable, SS_Limitable {
+	
+	/**
+	 *
+	 * @var array
+	 */
+	public static $dependencies = array(
+		'database' => '%$Database',
+	);
+	
 	/**
 	 * The DataObject class name that this data list is querying
 	 * 
@@ -27,6 +36,28 @@ class DataList extends ViewableData implements SS_List, SS_Filterable, SS_Sortab
 	 * @var DataModel
 	 */
 	protected $model;
+	
+	/**
+	 * {@link Database} object that this DataList will send queries to.
+	 * 
+	 * @var Database
+	 */
+	protected static $database;
+	
+
+	/**
+	 * Return the {@link Database} object that this DataList will send queries to.
+	 */
+	public static function get_database() {
+		return self::$database;
+	}
+	
+	/**
+	 * Set the {@link Database} object that this DataList will send queries to.
+	 */
+	public static function set_database($database) {
+		self::$database = $database;
+	}
 
 	/**
 	 * Create a new DataList.
@@ -120,7 +151,7 @@ class DataList extends ViewableData implements SS_List, SS_Filterable, SS_Sortab
 	/**
 	 * Add an join clause to this data list's query.
 	 *
-	 * @param type $join Escaped SQL statement
+	 * @param type $join Escaped SQL statement7
 	 * @return DataList 
 	 * @deprecated 3.0
 	 */
@@ -254,6 +285,24 @@ class DataList extends ViewableData implements SS_List, SS_Filterable, SS_Sortab
 			}
 		}
 		return $this;
+	}
+
+	/**
+	 * Filter this DataList by a callback function.
+	 * The function will be passed each record of the DataList in turn, and must return true for the record to be included.
+	 * Returns the filtered list.
+	 * 
+	 * Note that, in the current implementation, the filtered list will be an ArrayList, but this may change in a future
+	 * implementation.
+	 */
+	public function filterByCallback($callback) {
+		if(!is_callable($callback)) throw new LogicException("DataList::filterByCallback() must be passed something callable.");
+		
+		$output = new ArrayList;
+		foreach($this as $item) {
+			if($callback($item)) $output->push($item);
+		}
+		return $output;
 	}
 
 	/**
@@ -392,7 +441,7 @@ class DataList extends ViewableData implements SS_List, SS_Filterable, SS_Sortab
 	 */
 	public function toArray() {
 		$query = $this->dataQuery->query();
-		$rows = $query->execute();
+		$rows = self::$database->query($query);
 		$results = array();
 		
 		foreach($rows as $row) {
@@ -458,6 +507,7 @@ class DataList extends ViewableData implements SS_List, SS_Filterable, SS_Sortab
 		} else {
 			$item = new $defaultClass($row, false, $this->model);
 		}
+		$item->setDatabase(self::$database);
 		
 		return $item;
 	}

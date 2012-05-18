@@ -136,6 +136,27 @@ class DataObject extends ViewableData implements DataObjectInterface, i18nEntity
 	protected $brokenOnWrite = false;
 	
 	/**
+	 * {@link Database} object that this DataList will send queries to.
+	 * 
+	 * @var Database
+	 */
+	protected $database;
+
+	/**
+	 * Return the {@link Database} object that this DataList will send queries to.
+	 */
+	public function getDatabase() {
+		return $this->database;
+	}
+	
+	/**
+	 * Set the {@link Database} object that this DataList will send queries to.
+	 */
+	public function setDatabase($database) {
+		$this->database = $database;
+	}
+	
+	/**
 	 * Should dataobjects be validated before they are written?
 	 */
 	private static $validation_enabled = true;

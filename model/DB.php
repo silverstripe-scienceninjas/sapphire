@@ -97,6 +97,7 @@ class DB {
 		$conn = new $dbClass($databaseConfig);
 
 		self::setConn($conn);
+		DataList::set_database($conn);
 	}
 	
 	/**
